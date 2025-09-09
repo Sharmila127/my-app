@@ -1,22 +1,24 @@
-name: CI/CD to EC2
+name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image
         run: docker build -t myapp:latest .
 
-      - name: Save image
+      - name: Save Docker image to file
         run: docker save myapp:latest -o myapp.tar
 
       - name: Copy Docker image to EC2
@@ -27,7 +29,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "myapp.tar"
           target: "/home/ubuntu/"
-          tar_exec: ""   # ✅ disables auto-tar
+          tar_exec: "true"   # ✅ disables tar wrapping
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.0
