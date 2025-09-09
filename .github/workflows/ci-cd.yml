@@ -6,12 +6,12 @@ on:
       - main
 
 jobs:
-  build-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout Code
-      - name: Checkout Code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       # 2. Build Docker Image
@@ -19,7 +19,7 @@ jobs:
         run: |
           docker build -t myapp:latest .
 
-      # 3. Save Docker Image as tar
+      # 3. Save Docker Image to tar
       - name: Save Docker Image
         run: docker save myapp:latest -o myapp.tar
 
@@ -49,3 +49,4 @@ jobs:
               docker rm mycalcapp-container
             fi
             docker run -d --name mycalcapp-container -p 5000:5000 myapp:latest
+
