@@ -19,7 +19,7 @@ jobs:
       - name: Save image
         run: docker save myapp:latest -o myapp.tar
 
-      - name: Copy to EC2
+      - name: Copy Docker image to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -27,6 +27,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "myapp.tar"
           target: "/home/ubuntu/"
+          tar_exec: ""   # ✅ disables auto-tar
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.0
