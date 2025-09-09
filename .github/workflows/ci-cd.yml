@@ -1,4 +1,4 @@
-name: CI/CD Pipeline to EC2
+name: CI/CD to EC2
 
 on:
   push:
@@ -6,25 +6,20 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout Code
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      # 2. Build Docker Image
-      - name: Build Docker Image
-        run: |
-          docker build -t myapp:latest .
+      - name: Build Docker image
+        run: docker build -t myapp:latest .
 
-      # 3. Save Docker Image to tar
-      - name: Save Docker Image
+      - name: Save image
         run: docker save myapp:latest -o myapp.tar
 
-      # 4. Copy Image to EC2
-      - name: Copy Image to EC2
+      - name: Copy to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -33,7 +28,6 @@ jobs:
           source: "myapp.tar"
           target: "/home/ubuntu/"
 
-      # 5. Deploy on EC2
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -42,11 +36,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker load -i myapp.tar
-            if [ "$(docker ps -q -f name=mycalcapp-container)" ]; then
-              docker stop mycalcapp-container
-            fi
-            if [ "$(docker ps -a -q -f name=mycalcapp-container)" ]; then
-              docker rm mycalcapp-container
-            fi
+            docker stop mycalcapp-container || true
+            docker rm mycalcapp-container || true
             docker run -d --name mycalcapp-container -p 5000:5000 myapp:latest
-
