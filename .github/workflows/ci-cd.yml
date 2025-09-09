@@ -29,7 +29,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "myapp.tar"
           target: "/home/ubuntu/"
-          tar_exec: "true"   # ✅ disables tar wrapping
+          rm: true          # ✅ clean old files
+          tar_exec: ""      # ✅ disable tar wrapping
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.0
